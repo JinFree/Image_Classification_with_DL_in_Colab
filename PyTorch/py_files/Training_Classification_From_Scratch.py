@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from Model_Scratch import MODEL as MODEL_SCRATCH
 from Dataset_Classification import PyTorch_Classification_Dataset
 
-def main(_root_dir = "/content/cats_and_dogs_filtered/train"
+def main(_root_dir = "/content/cats_and_dogs_filtered"
          , _epochs = 50, _batch_size = 16):
     USE_CUDA = torch.cuda.is_available()
     DEVICE = torch.device("cuda" if USE_CUDA else "cpu")
@@ -26,9 +26,9 @@ def main(_root_dir = "/content/cats_and_dogs_filtered/train"
     TrainDataset = PyTorch_Classification_Dataset
     TestDataset = PyTorch_Classification_Dataset
 
-    train_data = TrainDataset(root_dir = _root_dir
+    train_data = TrainDataset(root_dir = _root_dir + "/train"
                     , transform = transform_train)
-    test_data = TestDataset(root_dir = _root_dir
+    test_data = TestDataset(root_dir = _root_dir + "/validation"
                     , transform = transform_test)
     
     train_loader = torch.utils.data.DataLoader(
@@ -90,4 +90,4 @@ def main(_root_dir = "/content/cats_and_dogs_filtered/train"
             print("model saved!")
 
 if __name__ == "__main__":
-    main("/content/cats_and_dogs_filtered/train", 50, 16)
+    main("/content/cats_and_dogs_filtered", 50, 16)
