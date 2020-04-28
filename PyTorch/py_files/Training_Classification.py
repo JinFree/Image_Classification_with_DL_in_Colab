@@ -1,5 +1,6 @@
 import torch
 import torch.optim as optim
+import torchvision.transforms as transforms
 from Model_Scratch import MODEL as MODEL_SCRATCH
 from Model_Transfer_Learning import MODEL as MODEL_TRANSFER
 from Dataset_Classification import PyTorch_Classification_Dataset
