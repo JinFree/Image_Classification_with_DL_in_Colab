@@ -1,11 +1,10 @@
+import os
 import torch
-from torchvision import models
-import torch.nn as nn
-import torch.nn.functional as F
-
-from PIL import Image
-import cv2
+import torchvision
+import torchvision.transforms as transforms
 import numpy as np
+from Model_Scratch import MODEL as MODEL_SCRATCH
+from Model_Transfer_Learning import MODEL as MODEL_TRANSFER
 
 def load_label_map(textFile):
     return np.loadtxt(textFile, str, delimiter='\t')
@@ -27,13 +26,8 @@ def inference_image(opencv_image, transform_info, model, DEVICE):
     result = model(image_tensor)
     return result
 
-import os
-import torch
-import torchvision
-import torchvision.transforms as transforms
-import numpy as np
 
-def main(image_path):
+def inference_main(image_path, _is_transfer = False):
     USE_CUDA = torch.cuda.is_available()
     DEVICE = torch.device("cuda" if USE_CUDA else "cpu")
 
@@ -44,11 +38,17 @@ def main(image_path):
                     ])
     class_map = load_label_map('label_map.txt')
     num_classes = len(class_map)
-
-    model = MODEL(num_classes).to(DEVICE)
-    model_str = "PyTorch_Classification_Model"
+    
+    model = None
+    model_str = None
+    if not _is_transfer:
+        model = MODEL_SCRATCH(num_classes).to(DEVICE)
+        model_str = "PyTorch_Classification_Model_Scratch"
+    else:
+        model = MODEL_TRANSFER(num_classes).to(DEVICE)
+        model_str = "PyTorch_Classification_Model_Trnasfer"
     model_str += ".pt" 
-
+    
     model.load_state_dict(torch.load(model_str))
     model.eval()
 
@@ -57,19 +57,19 @@ def main(image_path):
     inference_result = inference_result.cpu().detach().numpy()
     print_result(inference_result, class_map)
 
-!wget https://storage.googleapis.com/mledu-datasets/cats_and_dogs_filtered.zip
-!unzip -qq cats_and_dogs_filtered.zip
-
-import os
-PATH = "/content/cats_and_dogs_filtered/validation"
-validation_cats_dir = PATH + '/cats'  # directory with our validation cat pictures
-validation_dogs_dir = PATH + '/dogs'  # directory with our validation dog pictures
-list_of_test_cats_images = os.listdir(validation_cats_dir)
-list_of_test_dogs_images = os.listdir(validation_dogs_dir)
-for idx in range(len(list_of_test_cats_images)):
-    list_of_test_cats_images[idx] = validation_cats_dir + '/'+list_of_test_cats_images[idx]
-for idx in range(len(list_of_test_dogs_images)):
-    list_of_test_dogs_images[idx] = validation_dogs_dir + '/'+list_of_test_dogs_images[idx]
-list_of_test_images = list_of_test_cats_images + list_of_test_dogs_images
-
-main(list_of_test_images[600])
+def main(index, _PATH = "/content/cats_and_dogs_filtered/validation"):
+    PATH = _PATH
+    validation_cats_dir = PATH + '/cats'  # directory with our validation cat pictures
+    validation_dogs_dir = PATH + '/dogs'  # directory with our validation dog pictures
+    list_of_test_cats_images = os.listdir(validation_cats_dir)
+    list_of_test_dogs_images = os.listdir(validation_dogs_dir)
+    for idx in range(len(list_of_test_cats_images)):
+        list_of_test_cats_images[idx] = validation_cats_dir + '/'+list_of_test_cats_images[idx]
+    for idx in range(len(list_of_test_dogs_images)):
+        list_of_test_dogs_images[idx] = validation_dogs_dir + '/'+list_of_test_dogs_images[idx]
+    list_of_test_images = list_of_test_cats_images + list_of_test_dogs_images
+    inference_main(list_of_test_images[index])
+    return list_of_test_images
+    
+if __name__ == "__main__":
+    main(600)

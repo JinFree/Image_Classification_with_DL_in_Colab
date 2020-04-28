@@ -1,17 +1,16 @@
-
-
-
-
 import torch
 import torch.optim as optim
+from Model_Scratch import MODEL as MODEL_SCRATCH
+from Dataset_Classification import PyTorch_Classification_Dataset
 
-def main():
+def main(_root_dir = "/content/cats_and_dogs_filtered/train"
+         , _epochs = 50, _batch_size = 16):
     USE_CUDA = torch.cuda.is_available()
     DEVICE = torch.device("cuda" if USE_CUDA else "cpu")
 
     img_width, img_height = 224, 224
-    EPOCHS     = 50
-    BATCH_SIZE = 16
+    EPOCHS     = _epochs
+    BATCH_SIZE = _batch_size
     transform_train = transforms.Compose([
                 transforms.Resize(size=(img_width, img_height))
                 , transforms.RandomRotation(degrees=15)
@@ -22,12 +21,12 @@ def main():
                 , transforms.ToTensor()
                 ])
 
-    TrainDataset = PyTorchCustomDataset
-    TestDataset = PyTorchCustomDataset
+    TrainDataset = PyTorch_Classification_Dataset
+    TestDataset = PyTorch_Classification_Dataset
 
-    train_data = TrainDataset(root_dir = "/content/cats_and_dogs_filtered/train"
+    train_data = TrainDataset(root_dir = _root_dir
                     , transform = transform_train)
-    test_data = TestDataset(root_dir = "/content/cats_and_dogs_filtered/validation"
+    test_data = TestDataset(root_dir = _root_dir
                     , transform = transform_test)
     
     train_loader = torch.utils.data.DataLoader(
@@ -44,8 +43,8 @@ def main():
     train_data.__save_label_map__()
     num_classes = train_data.__num_classes__()
 
-    model = MODEL(num_classes).to(DEVICE)
-    model_str = "PyTorch_Classification_Model"
+    model = MODEL_SCRATCH(num_classes).to(DEVICE)
+    model_str = "PyTorch_Classification_Model_Scratch"
     model_str += ".pt" 
     optimizer = optim.Adam(model.parameters(), lr=0.0001)
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.1)
@@ -88,4 +87,5 @@ def main():
             torch.save(model.state_dict(), model_str)
             print("model saved!")
 
-main()
+if __name__ == "__main__":
+    main("/content/cats_and_dogs_filtered/train", 50, 16)
