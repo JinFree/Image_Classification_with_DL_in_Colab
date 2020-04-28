@@ -21,7 +21,7 @@ class MODEL(nn.Module):
             , nn.ReLU()
             , nn.Dropout()
             , nn.Linear(64, num_classes)
-            , nn.Sigmoid()
+            , nn.Softmax(dim=-1)
         )
     def forward(self, x):
         return self.classifier(x)
