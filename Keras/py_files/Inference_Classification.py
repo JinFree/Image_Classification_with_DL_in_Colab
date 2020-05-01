@@ -3,13 +3,13 @@ import numpy as np
 from keras.models import load_model
 from keras.models import model_from_json
 import json
+import os
 
 def restoreModel(model_str):
     with open(model_str + ".json", "r") as f:
         model_json = json.load(f)
     model_restored = model_from_json(model_json)
     model_restored.load_weights(model_str + ".h5")
-    model_restored.summary()
     return model_restored
 
 def load_label_map(textFile):
