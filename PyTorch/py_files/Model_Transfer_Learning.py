@@ -7,11 +7,8 @@ class MODEL(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
         self.network = models.mobilenet_v2(pretrained=True)
-        self.classifier = nn.Sequential(
-            nn.Dropout()
-            , nn.Linear(1000, num_classes)
-            , nn.Softmax(dim=-1)
-        )
+        num_ftrs = self.network.classifier[-1].in_features
+        self.network.classifier[-1] = nn.Linear(num_ftrs, num_classes)
+        
     def forward(self, x):
-        x = self.network(x)
-        return self.classifier(x)
+        return self.network(x)
